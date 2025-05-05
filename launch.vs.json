@@ -5,8 +5,8 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "Smash64R.exe",
-      "name": "Smash64R.exe",
+      "projectTarget": "Smash64r.exe",
+      "name": "Smash64r.exe",
       "currentDir": "${workspaceRoot}"
     }
   ]
