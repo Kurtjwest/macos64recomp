@@ -40,6 +40,20 @@ It's also recommend you install this specific version of llvm. Newer versions ha
 choco install llvm --version 18.1.8
 ```
 
+### MacOS
+You will need to install llvm 18.1.8 and some other dependencies:
+
+```
+brew install llvm@18 lld
+```
+
+Make sure llvm 18.1.8 is used:
+
+```
+export PATH="/opt/homebrew/opt/llvm@18/bin:$PATH" && export CC=clang && export CXX=clang++ && export LD=ld.lld
+```
+
+
 ## 3. Generating the C code
 
 Now that you have the required files, you must build [N64Recomp](https://github.com/Mr-Wiseguy/N64Recomp) and run it to generate the C code to be compiled. The building instructions can be found [here](https://github.com/Mr-Wiseguy/N64Recomp?tab=readme-ov-file#building). That will build the executables: `N64Recomp` and `RSPRecomp` which you should copy to the root of the Smash64r repository.
@@ -61,13 +75,13 @@ Resaving the `CMakeLists.txt` file in Visual Studio will update and reconfigure 
 If you prefer the command line or you're on a Unix platform you can build the project using CMake (though using VS is highly recommended):
 
 ```bash
-cmake -S . -B build-cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -G Ninja -DCMAKE_BUILD_TYPE=Release # or Debug if you want to debug
+cmake -S . -B build-cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -G Ninja -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Release # or Debug if you want to debug
 cmake --build build-cmake --target Smash64r -j$(nproc) --config Release # or Debug
 ```
 
 ## 5. Success
 
-Voilà! You should now have a `Smash64r.exe` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
+Voilà! You should now have a `Smash64r` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
 
 ## 6. Patches
 In the `patches/` directory, you can patch over existing functions in the game. You must patch the entire function for this to work, so you need the entire asm of the function from the decomp, or you need a C implementation. To patch a C function, place it in a C file in the `patches/` directory. Then place the attribute `RECOMP_PATCH` before the function declaration. When building the project with CMake in VS, these changes will automatically be picked up and used in place of the original recompiled functions. Ex of patching `syDmaReadRom` (but it just does the same thing it originally did, as a patch test)
