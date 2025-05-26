@@ -34,6 +34,9 @@
 #ifdef _WIN32
 #   include "InterfaceVS.hlsl.dxil.h"
 #   include "InterfacePS.hlsl.dxil.h"
+#elif defined(__APPLE__)
+#   include "InterfaceVS.hlsl.metal.h"
+#   include "InterfacePS.hlsl.metal.h"
 #endif
 
 #ifdef _WIN32
@@ -43,6 +46,13 @@
 #    define GET_SHADER_SIZE(name, format) \
         ((format) == RT64::RenderShaderFormat::SPIRV ? std::size(name##BlobSPIRV) : \
         (format) == RT64::RenderShaderFormat::DXIL ? std::size(name##BlobDXIL) : 0)
+#elif defined(__APPLE__)
+#    define GET_SHADER_BLOB(name, format) \
+((format) == RT64::RenderShaderFormat::SPIRV ? name##BlobSPIRV : \
+(format) == RT64::RenderShaderFormat::METAL ? name##BlobMSL : nullptr)
+#    define GET_SHADER_SIZE(name, format) \
+((format) == RT64::RenderShaderFormat::SPIRV ? std::size(name##BlobSPIRV) : \
+(format) == RT64::RenderShaderFormat::METAL ? std::size(name##BlobMSL) : 0)
 #else
 #    define GET_SHADER_BLOB(name, format) \
         ((format) == RT64::RenderShaderFormat::SPIRV ? name##BlobSPIRV : nullptr)

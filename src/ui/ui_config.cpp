@@ -725,7 +725,8 @@ public:
 			throw std::runtime_error("Failed to make RmlUi data model for the controls config menu");
 		}
 
-		constructor.BindFunc("input_count", [](Rml::Variant& out) { out = recomp::get_num_inputs(); } );
+		//constructor.BindFunc("input_count", [](Rml::Variant& out) { out = recomp::get_num_inputs(); } );
+		constructor.BindFunc("input_count", [](Rml::Variant& out) { out = static_cast<unsigned int>(recomp::get_num_inputs()); } );
 		constructor.BindFunc("input_device_is_keyboard", [](Rml::Variant& out) { out = cur_device == recomp::InputDevice::Keyboard; } );
 
 		constructor.RegisterTransformFunc("get_input_name", [](const Rml::VariantList& inputs) {

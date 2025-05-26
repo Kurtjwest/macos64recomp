@@ -6,18 +6,13 @@ entrypoint = 0x80000400
 # Paths are relative to the location of this config file.
 elf_path = "smashbrothers.us.elf"
 output_func_path = "RecompiledFuncs"
+#symbols_file_path = "smash64rsyms/dump.toml"
 #use_absolute_symbols = true
 manual_funcs = [
     { name = "_bnkfPatchBank", section = ".main", vram = 0x8001E708, size = 0xB8 },
     { name = "_bnkfPatchInst", section = ".main", vram = 0x8001E7C0, size = 0x98 },
     { name = "_bnkfPatchSound", section = ".main", vram = 0x8001E858, size = 0x58 },
     { name = "_bnkfPatchWaveTable", section = ".main", vram = 0x8001E8B0, size = 0x6C },
-]
-
-[patches]
-ignored = [
-    "n_aspMainTextStart",
-    "func_A4000040_40",
 ]
 
 # remove imem/dmem checks

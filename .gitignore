@@ -62,3 +62,14 @@ RSPRecomp
 
 # Controller mappings file
 gamecontrollerdb.txt
+/build-cmake
+Smash64r
+LiveRecompTest
+OfflineModRecomp
+RecompModTool
+saves/smashbrothers.us.bin
+saves/smashbrothers.us.bin.bak
+sound.json
+graphics.json
+general.json
+controls.json

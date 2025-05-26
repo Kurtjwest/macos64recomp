@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 project(Smash64r)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-misleading-indentation")
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+# Globally disable Werror if it's being set somewhere else
+string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+add_compile_options(-Wno-error=deprecated-declarations -Wno-deprecated-declarations)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything /W4")
@@ -28,7 +33,7 @@ if (WIN32)
 endif()
 
 set(RT64_STATIC TRUE)
-add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/lib/rt64)
 
 # set(BUILD_SHARED_LIBS_SAVED "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
@@ -295,6 +300,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     target_link_libraries(Smash64r PRIVATE "-latomic -static-libstdc++" ${CMAKE_DL_LIBS} Threads::Threads)
 endif()
 
+if(APPLE)
+    target_include_directories(Smash64r PRIVATE /opt/homebrew/Cellar/sdl2/2.32.6/include/SDL2)
+endif()
+
 target_link_libraries(Smash64r PRIVATE
     PatchesLib
     RecompiledFuncs
@@ -306,6 +315,7 @@ target_link_libraries(Smash64r PRIVATE
     RmlDebugger
     nfd
     lunasvg
+    ${MOLTENVK_LIB}
 )
 
 # TODO fix the rt64 CMake script so that this doesn't need to be duplicated here
@@ -339,5 +349,13 @@ build_vertex_shader(Smash64r "shaders/InterfaceVS.hlsl" "shaders/InterfaceVS.hls
 build_pixel_shader(Smash64r "shaders/InterfacePS.hlsl" "shaders/InterfacePS.hlsl")
 
 target_sources(Smash64r PRIVATE ${SOURCES})
+
+if(APPLE)
+    target_include_directories(Smash64r PRIVATE /opt/homebrew/Cellar/sdl2/2.32.6/include)
+    find_library(SDL2_LIBRARY SDL2 HINTS /opt/homebrew/lib REQUIRED)
+    target_link_libraries(Smash64r PRIVATE ${SDL2_LIBRARY})
+    include_directories(SYSTEM /opt/homebrew/include)
+    target_link_libraries(Smash64r PRIVATE ${MOLTENVK_LIB})
+endif()
 
 set_property(TARGET Smash64r PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
