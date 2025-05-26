@@ -26,8 +26,11 @@
 #define bzero bzero_recomp
 #define gRandFloat sRandFloat
 // #include "global.h"
+#include "patch_helpers.h"
 #include "PR/ultratypes.h"
 #include "rt64_extended_gbi.h"
+
+DECLARE_FUNC(void, recomp_load_overlays, u32 rom, void* ram, u32 size);
 
 #ifndef gEXFillRectangle
 #define gEXFillRectangle(cmd, lorigin, rorigin, ulx, uly, lrx, lry) \

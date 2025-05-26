@@ -1,14 +1,14 @@
 # Building Guide
 
-This guide will help you build the project on your local machine. The process will require you to provide a decompressed ROM of the US version of the game.
+This guide will help you build the project on your local machine. The process will require you to provide a ROM of the US version of the game.
 
-These steps cover: decompressing the ROM, running the recompiler and finally building the project.
+These steps cover: running the recompiler and building the project
 
-## 1. Clone the Zelda64Recomp Repository
-This project makes use of submodules so you will need to clone the repository with the `--recurse-submodules` flag.
+## 1. Clone the Smash64r Repository
+This project makes use of submodules so you will need to clone the repository with the `--recurse-submodules` flag. This will take awhile.
 
 ```bash
-git clone --recurse-submodules
+git clone --recurse-submodules https://github.com/zestydevy/smash64r.git
 # if you forgot to clone with --recurse-submodules
 # cd /path/to/cloned/repo && git submodule update --init --recursive
 ```
@@ -35,43 +35,45 @@ The other tool necessary will be `make` which can be installe via [Chocolatey](h
 choco install make
 ```
 
-## 3. Decompressing the target ROM
-You will need to decompress the NTSC-U N64 Majora's Mask ROM (sha1: d6133ace5afaa0882cf214cf88daba39e266c078) before running the recompiler.
+It's also recommend you install this specific version of llvm. Newer versions have dropped some flags that we need
+```
+choco install llvm --version 18.1.8
+```
 
-There are a few tools that can do it:
-* This python script from the Majora's Mask decompilation project: https://github.com/zeldaret/mm/blob/main/tools/buildtools/decompress_baserom.py
-* https://github.com/z64tools/z64decompress
+## 3. Generating the C code
 
-Regardless of which method you use, copy the decompressed ROM to the root of the Zelda64Recomp repository with this filename:
-- `mm.us.rev1.rom_uncompressed.z64`
-
-## 4. Generating the C code
-
-Now that you have the required files, you must build [N64Recomp](https://github.com/Mr-Wiseguy/N64Recomp) and run it to generate the C code to be compiled. The building instructions can be found [here](https://github.com/Mr-Wiseguy/N64Recomp?tab=readme-ov-file#building). That will build the executables: `N64Recomp` and `RSPRecomp` which you should copy to the root of the Zelda64Recomp repository.
+Now that you have the required files, you must build [N64Recomp](https://github.com/Mr-Wiseguy/N64Recomp) and run it to generate the C code to be compiled. The building instructions can be found [here](https://github.com/Mr-Wiseguy/N64Recomp?tab=readme-ov-file#building). That will build the executables: `N64Recomp` and `RSPRecomp` which you should copy to the root of the Smash64r repository.
 
 After that, go back to the repository root, and run the following commands:
 ```bash
-./N64Recomp us.rev1.toml
-./RSPRecomp aspMain.us.rev1.toml
-./RSPRecomp njpgdspMain.us.rev1.toml
+./N64Recomp smashbrothers.us.toml
+./RSPRecomp n_aspMain.toml
 ```
+This will cause N64Recomp to generate recompiled code in `RecompiledFuncs/`, and RSPRecomp will generate code in `rsp/n_aspMain.c`
 
-## 5. Building the Project
+## 4. Building the Project
 
 Finally, you can build the project! :rocket:
 
 On Windows, you can open the repository folder with Visual Studio, and you'll be able to `[build / run / debug]` the project from there.
+Resaving the `CMakeLists.txt` file in Visual Studio will update and reconfigure the build system.
 
-If you prefer the command line or you're on a Unix platform you can build the project using CMake:
+If you prefer the command line or you're on a Unix platform you can build the project using CMake (though using VS is highly recommended):
 
 ```bash
 cmake -S . -B build-cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -G Ninja -DCMAKE_BUILD_TYPE=Release # or Debug if you want to debug
-cmake --build build-cmake --target Zelda64Recompiled -j$(nproc) --config Release # or Debug
+cmake --build build-cmake --target Smash64r -j$(nproc) --config Release # or Debug
 ```
 
-## 6. Success
+## 5. Success
 
-Voilà! You should now have a `Zelda64Recompiled` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
+Voilà! You should now have a `Smash64r.exe` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
 
-> [!IMPORTANT]  
-> In the game itself, you should be using a standard ROM, not the decompressed one.
+## 6. Patches
+In the `patches/` directory, you can patch over existing functions in the game. You must patch the entire function for this to work, so you need the entire asm of the function from the decomp, or you need a C implementation. To patch a C function, place it in a C file in the `patches/` directory. Then place the attribute `RECOMP_PATCH` before the function declaration. When building the project with CMake in VS, these changes will automatically be picked up and used in place of the original recompiled functions. Ex of patching `syDmaReadRom` (but it just does the same thing it originally did, as a patch test)
+
+```
+RECOMP_PATCH void syDmaReadRom(uintptr_t rom_src, void *ram_dst, size_t size) {
+    syDmaCopy(gSYDmaRomPiHandle, rom_src, (uintptr_t)ram_dst, size, OS_READ);
+}
+```
