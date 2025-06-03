@@ -9,7 +9,7 @@
 #include "zelda_sound.h"
 #include "librecomp/helpers.hpp"
 // #include "../patches/input.h"
-// #include "../patches/graphics.h"
+#include "../patches/graphics.h"
 // #include "../patches/sound.h"
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
@@ -57,6 +57,18 @@ extern "C" void recomp_get_target_framerate(uint8_t* rdram, recomp_context* ctx)
 
     _return(ctx, ultramodern::get_target_framerate(60 / frame_divisor));
 }
+
+extern "C" void recomp_get_window_resolution(uint8_t* rdram, recomp_context* ctx) {
+    int width, height;
+    recompui::get_window_size(width, height);
+
+    gpr width_out = _arg<0, PTR(u32)>(rdram, ctx);
+    gpr height_out = _arg<1, PTR(u32)>(rdram, ctx);
+
+    MEM_W(0, width_out) = (u32)width;
+    MEM_W(0, height_out) = (u32)height;
+}
+
 
 extern "C" void recomp_get_aspect_ratio(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();

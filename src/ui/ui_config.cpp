@@ -4,6 +4,7 @@
 #include "zelda_config.h"
 #include "zelda_debug.h"
 #include "zelda_render.h"
+#include "zelda_support.h"
 #include "promptfont.h"
 #include "ultramodern/config.hpp"
 #include "ultramodern/ultramodern.hpp"
@@ -519,7 +520,8 @@ public:
 
 	}
 	Rml::ElementDocument* load_document(Rml::Context* context) override {
-        return context->LoadDocument("assets/config_menu.rml");
+        const std::filesystem::path asset = zelda64::get_asset_path("config_menu.rml");
+        return context->LoadDocument(asset.string());
 	}
 	void register_events(recompui::UiEventListenerInstancer& listener) override {
 		recompui::register_event(listener, "apply_options",
@@ -726,7 +728,7 @@ public:
 		}
 
 		//constructor.BindFunc("input_count", [](Rml::Variant& out) { out = recomp::get_num_inputs(); } );
-		constructor.BindFunc("input_count", [](Rml::Variant& out) { out = static_cast<unsigned int>(recomp::get_num_inputs()); } );
+		constructor.BindFunc("input_count", [](Rml::Variant& out) { out = static_cast<uint64_t>(recomp::get_num_inputs()); } );
 		constructor.BindFunc("input_device_is_keyboard", [](Rml::Variant& out) { out = cur_device == recomp::InputDevice::Keyboard; } );
 
 		constructor.RegisterTransformFunc("get_input_name", [](const Rml::VariantList& inputs) {

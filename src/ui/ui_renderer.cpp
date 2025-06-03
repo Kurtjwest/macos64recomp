@@ -15,6 +15,7 @@
 #include "recomp_input.h"
 #include "librecomp/game.hpp"
 #include "zelda_config.h"
+#include "zelda_support.h"
 #include "ui_rml_hacks.hpp"
 
 #include "concurrentqueue.h"
@@ -1172,7 +1173,8 @@ void init_hook(RT64::RenderInterface* interface, RT64::RenderDevice* device) {
         };
 
         for (const FontFace& face : font_faces) {
-            Rml::LoadFontFace(directory + face.filename, face.fallback_face);
+            auto font = zelda64::get_asset_path(face.filename);
+            Rml::LoadFontFace(font.string(), face.fallback_face);
         }
     }
 

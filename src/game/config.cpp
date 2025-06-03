@@ -2,6 +2,7 @@
 #include "recomp_input.h"
 #include "zelda_sound.h"
 #include "zelda_render.h"
+#include "zelda_support.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
 #include <filesystem>
@@ -137,6 +138,14 @@ std::filesystem::path zelda64::get_app_folder_path() {
        return std::filesystem::current_path();
    }
 
+#if defined(__APPLE__)
+   // Check for portable file in the directory containing the app bundle.
+   const auto app_bundle_path = zelda64::get_bundle_directory().parent_path();
+   if (std::filesystem::exists(app_bundle_path / "portable.txt")) {
+       return app_bundle_path;
+   }
+#endif
+
    std::filesystem::path recomp_dir{};
 
 #if defined(_WIN32)
@@ -148,16 +157,28 @@ std::filesystem::path zelda64::get_app_folder_path() {
    }
 
    CoTaskMemFree(known_path);
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
    // check for APP_FOLDER_PATH env var used by AppImage
    if (getenv("APP_FOLDER_PATH") != nullptr) {
        return std::filesystem::path{getenv("APP_FOLDER_PATH")};
    }
 
+#if defined(__APPLE__)
+   const auto supportdir = zelda64::get_application_support_directory();
+   if (supportdir) {
+       return *supportdir / zelda64::program_id;
+   }
+#endif
+
+
    const char *homedir;
 
    if ((homedir = getenv("HOME")) == nullptr) {
+       #if defined(__linux__)
        homedir = getpwuid(getuid())->pw_dir;
+    #elif defined(__APPLE__)
+        homedir = GetHomeDirectory();
+    #endif
    }
 
    if (homedir != nullptr) {

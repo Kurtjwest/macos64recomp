@@ -62,6 +62,8 @@ RSPRecomp
 
 # Controller mappings file
 gamecontrollerdb.txt
+
+
 /build-cmake
 Smash64r
 LiveRecompTest
@@ -73,3 +75,4 @@ sound.json
 graphics.json
 general.json
 controls.json
+Smash64r.app

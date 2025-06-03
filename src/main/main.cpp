@@ -25,8 +25,11 @@
 #include "zelda_config.h"
 #include "zelda_sound.h"
 #include "zelda_render.h"
+#include "zelda_support.h"
 #include "ovl_patches.hpp"
 #include "librecomp/game.hpp"
+
+#include "../../patches/graphics.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -41,7 +44,8 @@ void exit_error(const char* str, Ts ...args) {
     // TODO pop up an error
     ((void)fprintf(stderr, str, args), ...);
     assert(false);
-    std::quick_exit(EXIT_FAILURE);
+    // std::quick_exit(EXIT_FAILURE);
+    ultramodern::error_handling::quick_exit(__FILE__, __LINE__, __FUNCTION__);
 }
 
 ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
@@ -504,6 +508,8 @@ void release_preload(PreloadContext& context) {
 
 #endif
 
+#define REGISTER_FUNC(name) recomp::overlays::register_base_export(#name, name)
+
 int main(int argc, char** argv) {
     // Map this executable into memory and lock it, which should keep it in physical memory. This ensures
     // that there are no stutters from the OS having to load new pages of the executable whenever a new code page is run.
@@ -552,6 +558,8 @@ int main(int argc, char** argv) {
     for (const auto& game : supported_games) {
         recomp::register_game(game);
     }
+
+    REGISTER_FUNC(recomp_get_window_resolution);
 
     zelda64::register_overlays();
     zelda64::register_patches();
