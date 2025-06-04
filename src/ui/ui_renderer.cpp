@@ -49,11 +49,11 @@
         (format) == RT64::RenderShaderFormat::DXIL ? std::size(name##BlobDXIL) : 0)
 #elif defined(__APPLE__)
 #    define GET_SHADER_BLOB(name, format) \
-((format) == RT64::RenderShaderFormat::SPIRV ? name##BlobSPIRV : \
-(format) == RT64::RenderShaderFormat::METAL ? name##BlobMSL : nullptr)
+        ((format) == RT64::RenderShaderFormat::SPIRV ? name##BlobSPIRV : \
+        (format) == RT64::RenderShaderFormat::METAL ? name##BlobMSL : nullptr)
 #    define GET_SHADER_SIZE(name, format) \
-((format) == RT64::RenderShaderFormat::SPIRV ? std::size(name##BlobSPIRV) : \
-(format) == RT64::RenderShaderFormat::METAL ? std::size(name##BlobMSL) : 0)
+        ((format) == RT64::RenderShaderFormat::SPIRV ? std::size(name##BlobSPIRV) : \
+        (format) == RT64::RenderShaderFormat::METAL ? std::size(name##BlobMSL) : 0)
 #else
 #    define GET_SHADER_BLOB(name, format) \
         ((format) == RT64::RenderShaderFormat::SPIRV ? name##BlobSPIRV : nullptr)
