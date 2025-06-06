@@ -69,8 +69,7 @@ Smash64r
 LiveRecompTest
 OfflineModRecomp
 RecompModTool
-saves/smashbrothers.us.bin
-saves/smashbrothers.us.bin.bak
+saves/
 sound.json
 graphics.json
 general.json

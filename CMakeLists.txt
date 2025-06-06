@@ -4,7 +4,6 @@ if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version")
 endif()
 
-
 project(Smash64r LANGUAGES C CXX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-misleading-indentation")
 set(CMAKE_C_STANDARD 17)
@@ -387,7 +386,6 @@ if(APPLE)
     find_library(SDL2_LIBRARY SDL2 HINTS /opt/homebrew/lib REQUIRED)
     target_link_libraries(Smash64r PRIVATE ${SDL2_LIBRARY})
     include_directories(SYSTEM /opt/homebrew/include)
-    target_link_libraries(Smash64r PRIVATE ${MOLTENVK_LIB})
 endif()
 
 set_property(TARGET Smash64r PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
