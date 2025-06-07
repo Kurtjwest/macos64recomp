@@ -68,8 +68,19 @@ file(GLOB FUNC_CXX_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/*.cpp)
 
 target_sources(RecompiledFuncs PRIVATE ${FUNC_C_SOURCES} ${FUNC_CXX_SOURCES})
 
+# Download controller db file for controller support via SDL2
+set(GAMECONTROLLERDB_COMMIT "b1e4090b3d4266e55feb0793efa35792e05faf66")
+set(GAMECONTROLLERDB_URL "https://raw.githubusercontent.com/gabomdq/SDL_GameControllerDB/${GAMECONTROLLERDB_COMMIT}/gamecontrollerdb.txt")
+
+file(DOWNLOAD ${GAMECONTROLLERDB_URL} ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt
+     TLS_VERIFY ON)
+
+add_custom_target(DownloadGameControllerDB
+    DEPENDS ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt)
+
 # Main executable
 add_executable(MarioKart64Recompiled)
+add_dependencies(MarioKart64Recompiled DownloadGameControllerDB)
 
 # Generate mm_shader_cache.c from the MM shader cache if it exists
 if (EXISTS ${CMAKE_SOURCE_DIR}/shadercache/mm_shader_cache.bin)
@@ -95,6 +106,7 @@ set (SOURCES
     ${CMAKE_SOURCE_DIR}/src/game/debug.cpp
     ${CMAKE_SOURCE_DIR}/src/game/quicksaving.cpp
     ${CMAKE_SOURCE_DIR}/src/game/recomp_api.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/stub.cpp
 
     ${CMAKE_SOURCE_DIR}/src/ui/ui_renderer.cpp
     ${CMAKE_SOURCE_DIR}/src/ui/ui_launcher.cpp
