@@ -12,10 +12,17 @@
 	url = https://github.com/sammycage/lunasvg
 [submodule "lib/N64ModernRuntime"]
 	path = lib/N64ModernRuntime
-	url = https://github.com/N64Recomp/N64ModernRuntime.git
-[submodule "smash64rsyms"]
-	path = smash64rsyms
-	url = https://github.com/zestydevy/smash64rsyms
-[submodule "lib/ssb-decomp-re"]
-	path = lib/ssb-decomp-re
-	url = https://github.com/Rainchus/ssb-decomp-re.git
+	url = https://github.com/N64Recomp/N64ModernRuntime/
+	branch = misc-fixes
+[submodule "Kirby64Syms"]
+	path = Kirby64Syms
+	url = https://github.com/Kirby64Ret/Kirby64Syms
+[submodule "N64Recomp"]
+	path = N64Recomp
+	url = https://github.com/N64Recomp/N64Recomp
+[submodule "lib/slot_map"]
+	path = lib/slot_map
+	url = https://github.com/SergeyMakeev/slot_map
+[submodule "lib/kirby64"]
+	path = lib/kirby64
+	url = https://github.com/kirby64ret/kirby64
