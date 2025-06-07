@@ -25,4 +25,4 @@
 	url = https://github.com/SergeyMakeev/slot_map
 [submodule "lib/kirby64"]
 	path = lib/kirby64
-	url = https://github.com/kirby64ret/kirby64
+	url = https://github.com/Kirby64Ret/kirby64
