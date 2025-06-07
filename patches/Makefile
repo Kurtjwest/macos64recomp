@@ -3,42 +3,30 @@ TARGET = patches.elf
 CC      ?= clang
 LD      ?= ld.lld
 
-CFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -mno-check-zero-division \
+DECOMP := ../lib/kirby64
+LIBULTRA_INC := $(DECOMP)/libreultra/include/2.0I
+DECOMP_INCS := -I $(LIBULTRA_INC) -I $(LIBULTRA_INC)/PR -I $(DECOMP)/include -I $(DECOMP)/include/libc -I $(DECOMP)/src -I $(DECOMP)/src.old -I $(DECOMP)/assets -I../lib/rt64/include
+
+
+CFLAGS   := $(DECOMP_INCS) -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -mno-check-zero-division \
 			-fomit-frame-pointer -ffast-math -fno-unsafe-math-optimizations -fno-builtin-memset \
 			-Wall -Wextra -Wno-incompatible-library-redeclaration -Wno-unused-parameter -Wno-unknown-pragmas -Wno-unused-variable -Wno-missing-braces -Wno-unsupported-floating-point-opt
-CPPFLAGS := -nostdinc -D_LANGUAGE_C -DMIPS -D__sgi -I dummy_headers -I ../lib/ssb-decomp-re/include -I ../lib/ssb-decomp-re/include/PR -I ../lib/ssb-decomp-re/include/libc -I ../lib/ssb-decomp-re/src -I../lib/rt64/include
+CPPFLAGS := -nostdinc -Wno-incompatible-function-pointer-types -D_LANGUAGE_C -DTARGET_N64 -DMIPS -I dummy_headers $(DECOMP_INCS)
 LDFLAGS  := -nostdlib -T patches.ld -T syms.ld -Map patches.map --unresolved-symbols=ignore-all --emit-relocs
-ASFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -mno-check-zero-division
 
-
-# Find all C source files and assembly source files
-C_SRCS    := $(wildcard *.c)
-S_SRCS := $(wildcard *.s)
-
-# Create object lists for both C and assembly files
-C_OBJS    := $(C_SRCS:.c=.o)
-S_OBJS := $(S_SRCS:.s=.o)
-
-# Dependency files for C sources
+C_SRCS := $(wildcard *.c)
+C_OBJS := $(C_SRCS:.c=.o)
 C_DEPS := $(C_SRCS:.c=.d)
-S_DEPS := $(S_SRCS:.s=.d)
 
-# Link target includes both C and assembly objects
-$(TARGET): $(C_OBJS) $(S_OBJS) patches.ld syms.ld
-	$(LD) $(C_OBJS) $(ASM_OBJS) $(LDFLAGS) -o $@
+$(TARGET): $(C_OBJS) patches.ld syms.ld
+	$(LD) $(C_OBJS) $(LDFLAGS) -o $@
 
-# Rule for compiling C files
 $(C_OBJS): %.o : %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) $< -MMD -MF $(@:.o=.d) -c -o $@
 
-# Rule for assembling .s files
-$(S_OBJS): %.o : %.s
-	$(CC) $(ASFLAGS) $(CPPFLAGS) -x assembler-with-cpp $< -MMD -MF $(@:.o=.d) -c -o $@
-
 clean:
-	rm -rf $(C_OBJS) $(S_OBJS) $(TARGET) $(C_DEPS) $(S_DEPS)
+	rm -rf $(C_OBJS) $(TARGET) $(C_DEPS)
 
 -include $(C_DEPS)
--include $(S_DEPS)
 
 .PHONY: clean

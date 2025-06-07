@@ -1,25 +1,12 @@
 #include "patches.h"
 #include "misc_funcs.h"
 
-#define va_list __builtin_va_list
-#define va_start __builtin_va_start
-#define va_arg __builtin_va_arg
-#define va_end __builtin_va_end
+#include <stdarg.h>
 
-int dummyData2 = 1;
-int dummyBss2;
-
-void dummyFunc(void)
-{
-    return;
-}
-
-typedef unsigned int size_t;
 typedef char *outfun(char*,const char*,size_t);
+extern int _Printf(outfun prout, char *arg, const char *fmt, va_list args);
 
-int _Printf(outfun prout, char *arg, const char *fmt, va_list args);
-
-char* proutPrintf(char* dst, const char* fmt, size_t size) {
+void* proutPrintf(void* dst, const char* fmt, size_t size) {
     recomp_puts(fmt, size);
     return (void*)1;
 }
@@ -34,3 +21,23 @@ int recomp_printf(const char* fmt, ...) {
 
     return ret;
 }
+
+RECOMP_PATCH void fatal_printf(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    recomp_printf(fmt, args);
+
+    va_end(args);
+}
+
+RECOMP_PATCH void print_error_stub(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    recomp_printf(fmt, args);
+
+    va_end(args);
+}
+
+

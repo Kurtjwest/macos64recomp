@@ -5,8 +5,8 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "Smash64r.exe",
-      "name": "Smash64r.exe",
+      "projectTarget": "Kirby64Recompiled.exe",
+      "name": "Kirby64Recompiled.exe",
       "currentDir": "${workspaceRoot}"
     }
   ]

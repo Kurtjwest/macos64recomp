@@ -69,8 +69,7 @@ extern "C" void recomp_get_window_resolution(uint8_t* rdram, recomp_context* ctx
     MEM_W(0, height_out) = (u32)height;
 }
 
-
-extern "C" void recomp_get_aspect_ratio(uint8_t* rdram, recomp_context* ctx) {
+extern "C" void recomp_get_target_aspect_ratio(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
     float original = _arg<0, float>(rdram, ctx);
     int width, height;
@@ -103,7 +102,7 @@ extern "C" void recomp_time_us(uint8_t* rdram, recomp_context* ctx) {
     _return(ctx, static_cast<u32>(std::chrono::duration_cast<std::chrono::microseconds>(ultramodern::time_since_start()).count()));
 }
 
-extern "C" void recomp_autosave_enabled(uint8_t* rdram, recomp_context* ctx) {
+extern "C" void recomp_get_autosave_enabled(uint8_t* rdram, recomp_context* ctx) {
     _return(ctx, static_cast<s32>(zelda64::get_autosave_mode() == zelda64::AutosaveMode::On));
 }
 
@@ -143,7 +142,7 @@ extern "C" void recomp_get_analog_inverted_axes(uint8_t* rdram, recomp_context* 
     *y_out = (mode == zelda64::CameraInvertMode::InvertY || mode == zelda64::CameraInvertMode::InvertBoth);
 }
 
-extern "C" void recomp_analog_cam_enabled(uint8_t* rdram, recomp_context* ctx) {
+extern "C" void recomp_get_analog_cam_enabled(uint8_t* rdram, recomp_context* ctx) {
     _return<s32>(ctx, zelda64::get_analog_cam_mode() == zelda64::AnalogCamMode::On);
 }
 
@@ -177,49 +176,4 @@ extern "C" void recomp_set_right_analog_suppressed(uint8_t* rdram, recomp_contex
     s32 suppressed = _arg<0, s32>(rdram, ctx);
 
     recomp::set_right_analog_suppressed(suppressed);
-}
-
-extern "C" void __osSetWatchLo_recomp(uint8_t * rdram, recomp_context * ctx) {
-    // ..
-}
-
-extern "C" void __f_to_ll_recomp(uint8_t * rdram, recomp_context * ctx) {
-    int64_t ret = (int64_t)ctx->f12.fl;
-
-    ctx->r2 = (int32_t)(ret >> 32);
-    ctx->r3 = (int32_t)(ret >> 0);
-}
-
-extern "C" void __ull_rshift_recomp(uint8_t * rdram, recomp_context * ctx) {
-    uint64_t a = (ctx->r4 << 32) | ((ctx->r5 << 0) & 0xFFFFFFFFu);
-    uint64_t b = (ctx->r6 << 32) | ((ctx->r7 << 0) & 0xFFFFFFFFu);
-    uint64_t ret = a >> b;
-
-    ctx->r2 = (int32_t)(ret >> 32);
-    ctx->r3 = (int32_t)(ret >> 0);
-}
-
-extern "C" void __ll_lshift_recomp(uint8_t * rdram, recomp_context * ctx) {
-    uint64_t a = (ctx->r4 << 32) | ((ctx->r5 << 0) & 0xFFFFFFFFu);
-    uint64_t b = (ctx->r6 << 32) | ((ctx->r7 << 0) & 0xFFFFFFFFu);
-    uint64_t ret = a << b;
-
-    ctx->r2 = (int32_t)(ret >> 32);
-    ctx->r3 = (int32_t)(ret >> 0);
-}
-
-extern "C" void __ll_to_f_recomp(uint8_t * rdram, recomp_context * ctx) {
-    int64_t a = (ctx->r4 << 32) | ((ctx->r5 << 0) & 0xFFFFFFFFu);
-    float ret = (float)a;
-
-    ctx->f0.fl = ret;
-}
-
-extern "C" void __ll_rem_recomp(uint8_t * rdram, recomp_context * ctx) {
-    uint64_t a = (ctx->r4 << 32) | ((ctx->r5 << 0) & 0xFFFFFFFFu);
-    int64_t b = (ctx->r6 << 32) | ((ctx->r7 << 0) & 0xFFFFFFFFu);
-    int64_t ret = a % b;
-
-    ctx->r2 = (int32_t)(ret >> 32);
-    ctx->r3 = (int32_t)(ret >> 0);
 }

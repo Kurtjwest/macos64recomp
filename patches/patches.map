@@ -1,0 +1,91 @@
+     VMA      LMA     Size Align Out     In      Symbol
+       0        0        0     1 RAMBASE = 0x80801000
+       0        0        0     1 PATCH_RAM_END = 0x81000000
+80801000        0       e0    16 .text
+80801000        0       70    16         analog.o:(.text)
+80801000        0       14     1                 get_stickX
+80801014       14       5c     1                 get_speed_change
+80801070       70       64    16         print.o:(.text)
+80801070       70       24     1                 proutPrintf
+80801094       94       40     1                 recomp_printf
+808010e0       e0        0    16         unlock_everything.o:(.text)
+808010e0       e0       e8     4 .recomp_patch
+808010e0       e0       58     4         print.o:(.recomp_patch)
+808010e0       e0       2c     1                 fatal_printf
+8080110c      10c       2c     1                 print_error_stub
+80801138      138       90     4         unlock_everything.o:(.recomp_patch)
+80801138      138       90     1                 func_80151100_ovl4
+808011c8      1c8        8     4 .rodata
+808011c8      1c8        8     4         <internal>:(.rodata.cst4)
+808011d0 808011d0        0    16 .data
+808011d0 808011d0        0    16         analog.o:(.data)
+808011d0 808011d0        0    16         print.o:(.data)
+808011d0 808011d0        0    16         unlock_everything.o:(.data)
+808011d0 808011d0        0    16 .bss
+808011d0 808011d0        0    16         analog.o:(.bss)
+808011d0 808011d0        0    16         print.o:(.bss)
+808011d0 808011d0        0    16         unlock_everything.o:(.bss)
+808011d0 808011d0        0     1 
+       0        0      4f0     4 .symtab
+       0        0      4f0     4         <internal>:(.symtab)
+       0        0      5e7     1 .strtab
+       0        0      5e7     1         <internal>:(.strtab)
+       0        0       5e     1 .shstrtab
+       0        0       5e     1         <internal>:(.shstrtab)
+808011d0 808011d0        0     1 __start = 0x80000000
+808011d0 808011d0        0     1 recomp_puts = 0x8F000000
+808011d0 808011d0        0     1 recomp_exit = 0x8F000004
+808011d0 808011d0        0     1 osRecvMesg_recomp = 0x8F000010
+808011d0 808011d0        0     1 osSendMesg_recomp = 0x8F000014
+808011d0 808011d0        0     1 recomp_get_gyro_deltas = 0x8F000018
+808011d0 808011d0        0     1 recomp_get_target_aspect_ratio = 0x8F00001C
+808011d0 808011d0        0     1 recomp_get_pending_warp = 0x8F000020
+808011d0 808011d0        0     1 recomp_powf = 0x8F000024
+808011d0 808011d0        0     1 recomp_get_target_framerate = 0x8F000028
+808011d0 808011d0        0     1 recomp_get_targeting_mode = 0x8F00002C
+808011d0 808011d0        0     1 recomp_get_bgm_volume = 0x8F000030
+808011d0 808011d0        0     1 recomp_get_low_health_beeps_enabled = 0x8F000034
+808011d0 808011d0        0     1 __sinf_recomp = 0x8F000038
+808011d0 808011d0        0     1 __cosf_recomp = 0x8F00003C
+808011d0 808011d0        0     1 osCreateMesgQueue_recomp = 0x8F000048
+808011d0 808011d0        0     1 recomp_set_current_frame_poll_id = 0x8F00004C
+808011d0 808011d0        0     1 recomp_time_us = 0x8F000050
+808011d0 808011d0        0     1 recomp_measure_latency = 0x8F000054
+808011d0 808011d0        0     1 osViGetCurrentFramebuffer_recomp = 0x8F000058
+808011d0 808011d0        0     1 bzero_recomp = 0x8F00005C
+808011d0 808011d0        0     1 osFlashWriteArray_recomp = 0x8F000060
+808011d0 808011d0        0     1 osFlashWriteBuffer_recomp = 0x8F000064
+808011d0 808011d0        0     1 osWritebackDCache_recomp = 0x8F000068
+808011d0 808011d0        0     1 recomp_get_pending_set_time = 0x8F00006C
+808011d0 808011d0        0     1 osContStartReadData_recomp = 0x8F000070
+808011d0 808011d0        0     1 osContGetReadData_recomp = 0x8F000074
+808011d0 808011d0        0     1 osContStartQuery_recomp = 0x8F000078
+808011d0 808011d0        0     1 osContGetQuery_recomp = 0x8F00007C
+808011d0 808011d0        0     1 recomp_get_mouse_deltas = 0x8F000080
+808011d0 808011d0        0     1 bcmp_recomp = 0x8F000084
+808011d0 808011d0        0     1 osGetTime_recomp = 0x8F000088
+808011d0 808011d0        0     1 recomp_get_autosave_enabled = 0x8F00008C
+808011d0 808011d0        0     1 recomp_load_overlays = 0x8F000090
+808011d0 808011d0        0     1 osInvalICache_recomp = 0x8F000094
+808011d0 808011d0        0     1 recomp_get_analog_cam_enabled = 0x8F000098
+808011d0 808011d0        0     1 recomp_get_camera_inputs = 0x8F00009C
+808011d0 808011d0        0     1 recomp_set_right_analog_suppressed = 0x8F0000A0
+808011d0 808011d0        0     1 recomp_get_inverted_axes = 0x8F0000A4
+808011d0 808011d0        0     1 recomp_high_precision_fb_enabled = 0x8F0000A8
+808011d0 808011d0        0     1 recomp_get_resolution_scale = 0x8F0000AC
+808011d0 808011d0        0     1 recomp_get_analog_inverted_axes = 0x8F0000B0
+808011d0 808011d0        0     1 recomp_get_window_resolution = 0x8F0000B4
+808011d0 808011d0        0     1 recomp_run_ui_callbacks = 0x8F0000B8
+808011d0 808011d0        0     1 recomp_register_actor_extension = 0x8F0000BC
+808011d0 808011d0        0     1 recomp_register_actor_extension_generic = 0x8F0000C0
+808011d0 808011d0        0     1 recomp_clear_all_actor_data = 0x8F0000C4
+808011d0 808011d0        0     1 recomp_create_actor_data = 0x8F0000C8
+808011d0 808011d0        0     1 recomp_destroy_actor_data = 0x8F0000CC
+808011d0 808011d0        0     1 recomp_get_actor_data = 0x8F0000D0
+808011d0 808011d0        0     1 recomp_get_actor_spawn_index = 0x8F0000D4
+       0        0       60     4 .rel.text
+       0        0       40     4         analog.o:(.rel.text)
+      40       40       20     4         print.o:(.rel.text)
+       0        0       58     4 .rel.recomp_patch
+       0        0       10     4         print.o:(.rel.recomp_patch)
+      10       10       48     4         unlock_everything.o:(.rel.recomp_patch)

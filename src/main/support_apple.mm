@@ -24,7 +24,7 @@ namespace zelda64 {
     std::filesystem::path get_bundle_resource_directory() {
         NSString *bundlePath = [[NSBundle mainBundle] resourcePath];
         return std::filesystem::path([bundlePath UTF8String]);
-     }
+    }
 
     std::filesystem::path get_bundle_directory() {
         NSString *bundlePath = [[NSBundle mainBundle] bundlePath];

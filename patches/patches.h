@@ -4,6 +4,11 @@
 #define RECOMP_EXPORT __attribute__((section(".recomp_export")))
 #define RECOMP_PATCH __attribute__((section(".recomp_patch")))
 #define RECOMP_FORCE_PATCH __attribute__((section(".recomp_force_patch")))
+#define RECOMP_DECLARE_EVENT(func) \
+    _Pragma("GCC diagnostic push") \
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"") \
+    __attribute__((noinline, weak, used, section(".recomp_event"))) void func {} \
+    _Pragma("GCC diagnostic pop")
 
 // TODO fix renaming symbols in patch recompilation
 #define osCreateMesgQueue osCreateMesgQueue_recomp
@@ -26,11 +31,7 @@
 #define bzero bzero_recomp
 #define gRandFloat sRandFloat
 // #include "global.h"
-#include "patch_helpers.h"
-#include "PR/ultratypes.h"
 #include "rt64_extended_gbi.h"
-
-DECLARE_FUNC(void, recomp_load_overlays, u32 rom, void* ram, u32 size);
 
 #ifndef gEXFillRectangle
 #define gEXFillRectangle(cmd, lorigin, rorigin, ulx, uly, lrx, lry) \
@@ -69,6 +70,7 @@ DECLARE_FUNC(void, recomp_load_overlays, u32 rom, void* ram, u32 size);
 
 
 int recomp_printf(const char* fmt, ...);
+float recomp_powf(float, float);
 
 #define INCBIN(identifier, filename)          \
     asm(".pushsection .rodata\n"              \
@@ -81,6 +83,7 @@ int recomp_printf(const char* fmt, ...);
         "\t.balign 8\n"                       \
         "\t.popsection\n");                   \
     extern u8 identifier[]
+
 
 void recomp_crash(const char* err);
 

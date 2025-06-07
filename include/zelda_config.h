@@ -7,8 +7,8 @@
 #include "recomp_input.h"
 
 namespace zelda64 {
-    constexpr std::u8string_view program_id = u8"Smash-Bros-Recompiled";
-    constexpr std::string_view program_name = "Smash Bros: Recompiled";
+    constexpr std::u8string_view program_id = u8"Kirby64Recompiled";
+    constexpr std::string_view program_name = "Kirby 64: Recompiled";
 
     // TODO: Move loading configs to the runtime once we have a way to allow per-project customization.
     void load_config();
