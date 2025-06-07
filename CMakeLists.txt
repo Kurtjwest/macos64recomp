@@ -1,19 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
-project(Smash64r)
+
+if (APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version")
+endif()
+
+project(MarioKart64Recompiled LANGUAGES C CXX)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-misleading-indentation -Wno-implicit-function-declaration")
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything /W4")
+if (APPLE)
+    enable_language(OBJC OBJCXX)
 endif()
 
-# Opt out of constexpr mutex constructor on windows to prevent vcredist issues
-if (WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR")
-endif()
+# Globally disable Werror if it's being set somewhere else
+string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+add_compile_options(-Wno-error=deprecated-declarations -Wno-deprecated-declarations -Wno-implicit-function-declaration)
 
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
@@ -28,7 +33,7 @@ if (WIN32)
 endif()
 
 set(RT64_STATIC TRUE)
-add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/lib/rt64)
 
 # set(BUILD_SHARED_LIBS_SAVED "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
@@ -49,8 +54,6 @@ add_library(RecompiledFuncs STATIC)
 target_compile_options(RecompiledFuncs PRIVATE
     # -Wno-unused-but-set-variable
     -fno-strict-aliasing
-    -Wno-unused-variable
-    -Wno-implicit-function-declaration
 )
 
 target_include_directories(RecompiledFuncs PRIVATE
@@ -65,86 +68,13 @@ file(GLOB FUNC_CXX_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/*.cpp)
 
 target_sources(RecompiledFuncs PRIVATE ${FUNC_C_SOURCES} ${FUNC_CXX_SOURCES})
 
-# PatchesLib - Library containing the recompiled output for any custom function patches
-add_library(PatchesLib STATIC)
-
-target_compile_options(PatchesLib PRIVATE
-    # -Wno-unused-but-set-variable
-    -fno-strict-aliasing
-    -Wno-unused-variable
-    -Wno-implicit-function-declaration
-)
-
-target_include_directories(PatchesLib PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
-    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
-    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
-)
-
-target_sources(PatchesLib PRIVATE
-    ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c
-    ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
-)
-
-set_source_files_properties(${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c PROPERTIES COMPILE_FLAGS -fno-strict-aliasing)
-
-# Build patches elf
-if(NOT DEFINED PATCHES_C_COMPILER)
-    set(PATCHES_C_COMPILER clang)
-endif()
-
-if(NOT DEFINED PATCHES_LD)
-    set(PATCHES_LD ld.lld)
-endif()
-
-if(NOT DEFINED PATCHES_OBJCOPY)
-    set(PATCHES_OBJCOPY llvm-objcopy)
-endif()
-
-add_custom_target(PatchesBin
-    COMMAND ${CMAKE_COMMAND} -E env CC=${PATCHES_C_COMPILER} LD=${PATCHES_LD} OBJCOPY=${PATCHES_OBJCOPY} make
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/patches
-    BYPRODUCTS ${CMAKE_SOURCE_DIR}/patches/patches.elf
-)
-
-# Generate patches_bin.c from patches.bin
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
-    COMMAND file_to_c ${CMAKE_SOURCE_DIR}/patches/patches.bin mm_patches_bin ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.h 
-    DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.bin
-)
-
-# Recompile patches elf into patches.c and patches.bin
-add_custom_command(OUTPUT
-                       ${CMAKE_SOURCE_DIR}/patches/patches.bin
-                       ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c
-                       ${CMAKE_SOURCE_DIR}/RecompiledPatches/recomp_overlays.inl
-                       ${CMAKE_SOURCE_DIR}/RecompiledPatches/funcs.h
-                   # TODO: Look into why modifying patches requires two builds to take
-                   COMMAND ./N64Recomp patches.toml
-                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                   DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf
-)
-
-
-# Download controller db file for controller support via SDL2
-set(GAMECONTROLLERDB_COMMIT "b1e4090b3d4266e55feb0793efa35792e05faf66")
-set(GAMECONTROLLERDB_URL "https://raw.githubusercontent.com/gabomdq/SDL_GameControllerDB/${GAMECONTROLLERDB_COMMIT}/gamecontrollerdb.txt")
-
-file(DOWNLOAD ${GAMECONTROLLERDB_URL} ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt
-     TLS_VERIFY ON)
-
-add_custom_target(DownloadGameControllerDB
-    DEPENDS ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt)
-
 # Main executable
-add_executable(Smash64r)
-add_dependencies(Smash64r DownloadGameControllerDB)
+add_executable(MarioKart64Recompiled)
 
 # Generate mm_shader_cache.c from the MM shader cache if it exists
 if (EXISTS ${CMAKE_SOURCE_DIR}/shadercache/mm_shader_cache.bin)
     set(HAS_MM_SHADER_CACHE TRUE)
-    target_compile_definitions(Smash64r PRIVATE HAS_MM_SHADER_CACHE)
+    target_compile_definitions(MarioKart64Recompiled PRIVATE HAS_MM_SHADER_CACHE)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mm_shader_cache.c ${CMAKE_CURRENT_BINARY_DIR}/mm_shader_cache.h
         COMMAND file_to_c ${CMAKE_SOURCE_DIR}/shadercache/mm_shader_cache.bin mm_shader_cache_bytes ${CMAKE_CURRENT_BINARY_DIR}/mm_shader_cache.c ${CMAKE_CURRENT_BINARY_DIR}/mm_shader_cache.h
         DEPENDS ${CMAKE_SOURCE_DIR}/shadercache/mm_shader_cache.bin
@@ -153,6 +83,7 @@ endif()
 
 set (SOURCES
     ${CMAKE_SOURCE_DIR}/src/main/main.cpp
+    ${CMAKE_SOURCE_DIR}/src/main/support.cpp
     ${CMAKE_SOURCE_DIR}/src/main/register_overlays.cpp
     ${CMAKE_SOURCE_DIR}/src/main/register_patches.cpp
     ${CMAKE_SOURCE_DIR}/src/main/rt64_render_context.cpp
@@ -171,16 +102,20 @@ set (SOURCES
     ${CMAKE_SOURCE_DIR}/src/ui/ui_color_hack.cpp
     ${CMAKE_SOURCE_DIR}/src/ui/ui_rml_hacks.cpp
 
-    ${CMAKE_SOURCE_DIR}/rsp/n_aspMain.cpp
+    ${CMAKE_SOURCE_DIR}/rsp/aspMain.cpp
 
     ${CMAKE_SOURCE_DIR}/lib/RmlUi/Backends/RmlUi_Platform_SDL.cpp
 )
+
+if (APPLE)
+    list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/src/main/support_apple.mm)
+endif()
 
 if (HAS_MM_SHADER_CACHE)
     list(APPEND SOURCES ${CMAKE_CURRENT_BINARY_DIR}/mm_shader_cache.c)
 endif()
 
-target_include_directories(Smash64r PRIVATE
+target_include_directories(MarioKart64Recompiled PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
     ${CMAKE_SOURCE_DIR}/lib/concurrentqueue
@@ -201,50 +136,52 @@ target_include_directories(Smash64r PRIVATE
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|AMD64")
-    target_compile_options(Smash64r PRIVATE
+    target_compile_options(MarioKart64Recompiled PRIVATE
         -march=nehalem
         -fno-strict-aliasing
         -fms-extensions
     )
 else()
-    target_compile_options(Smash64r PRIVATE
+    target_compile_options(MarioKart64Recompiled PRIVATE
         -fno-strict-aliasing
         -fms-extensions
     )
 endif()
 
+if (APPLE)
+    # Use a wrapper around ld64 that respects segprot's `max_prot` value in order
+    # to make our executable memory writable (required for mod function patching)
+    target_link_options(MarioKart64Recompiled PRIVATE
+        "-fuse-ld=${CMAKE_SOURCE_DIR}/.github/macos/ld64"
+    )
+endif()
+
 if (WIN32)
     include(FetchContent)
-
-    if (DEFINED ENV{SDL2_VERSION})
-        set(SDL2_VERSION $ENV{SDL2_VERSION})
-    else()
-        set(SDL2_VERSION "2.30.3")
-    endif()
-
     # Fetch SDL2 on windows
     FetchContent_Declare(
         sdl2
-        URL https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-devel-${SDL2_VERSION}-VC.zip
+        URL https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-devel-2.28.5-VC.zip
+        URL_HASH MD5=d8173db078e54040c666f411c5a6afff
     )
     FetchContent_MakeAvailable(sdl2)
-    target_include_directories(Smash64r PRIVATE
+    target_include_directories(MarioKart64Recompiled PRIVATE
         ${sdl2_SOURCE_DIR}/include
     )
-    target_link_directories(Smash64r PRIVATE
+    target_link_directories(MarioKart64Recompiled PRIVATE
         ${sdl2_SOURCE_DIR}/lib/x64
     )
 
     # Copy SDL2 and dxc DLLs to output folder as post build step
-    add_custom_command(TARGET Smash64r POST_BUILD
+    add_custom_command(TARGET MarioKart64Recompiled POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${sdl2_SOURCE_DIR}/lib/x64/SDL2.dll"
             "${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxil.dll"
             "${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxcompiler.dll"
-            $<TARGET_FILE_DIR:Smash64r>)
+            $<TARGET_FILE_DIR:MarioKart64Recompiled>)
 
     set_target_properties(
-        Smash64r
+        MarioKart64Recompiled
         PROPERTIES
             LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
             LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
@@ -252,7 +189,20 @@ if (WIN32)
             LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
     )
 
-    target_sources(Smash64r PRIVATE ${CMAKE_SOURCE_DIR}/icons/app.rc)
+    target_sources(MarioKart64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/icons/app.rc)
+endif()
+
+if (APPLE)
+    find_package(SDL2 REQUIRED)
+    target_include_directories(MarioKart64Recompiled PRIVATE ${SDL2_INCLUDE_DIRS})
+
+    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    find_package(Threads REQUIRED)
+
+    target_link_libraries(MarioKart64Recompiled PRIVATE ${CMAKE_DL_LIBS} Threads::Threads SDL2::SDL2)
+
+    include(${CMAKE_SOURCE_DIR}/.github/macos/apple_bundle.cmake)
 endif()
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
@@ -264,20 +214,20 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
         COMMAND file_to_c ${CMAKE_SOURCE_DIR}/icons/512.png icon_bytes ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.h 
         DEPENDS ${CMAKE_SOURCE_DIR}/icons/512.png
     )
-    target_sources(Smash64r PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c)
+    target_sources(MarioKart64Recompiled PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c)
 
     message(STATUS "SDL2_FOUND = ${SDL2_FOUND}")
     message(STATUS "SDL2_INCLUDE_DIRS = ${SDL2_INCLUDE_DIRS}")
 
-    target_include_directories(Smash64r PRIVATE ${SDL2_INCLUDE_DIRS})
+    target_include_directories(MarioKart64Recompiled PRIVATE ${SDL2_INCLUDE_DIRS})
 
     message(STATUS "X11_FOUND = ${X11_FOUND}")
     message(STATUS "X11_Xrandr_FOUND = ${X11_Xrandr_FOUND}")
     message(STATUS "X11_INCLUDE_DIR = ${X11_INCLUDE_DIR}")
     message(STATUS "X11_LIBRARIES = ${X11_LIBRARIES}")
 
-    target_include_directories(Smash64r PRIVATE ${X11_INCLUDE_DIR} ${X11_Xrandr_INCLUDE_PATH})
-    target_link_libraries(Smash64r PRIVATE ${X11_LIBRARIES} ${X11_Xrandr_LIB})
+    target_include_directories(MarioKart64Recompiled PRIVATE ${X11_INCLUDE_DIR} ${X11_Xrandr_INCLUDE_PATH})
+    target_link_libraries(MarioKart64Recompiled PRIVATE ${X11_LIBRARIES} ${X11_Xrandr_LIB})
 
     find_package(Freetype REQUIRED)
 
@@ -286,17 +236,16 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     message(STATUS "FREETYPE_LIBRARIES = ${FREETYPE_LIBRARIES}")
 
     include_directories(${FREETYPE_LIBRARIES})
-    target_link_libraries(Smash64r PRIVATE ${FREETYPE_LIBRARIES})
+    target_link_libraries(MarioKart64Recompiled PRIVATE ${FREETYPE_LIBRARIES} SDL2::SDL2)
 
     set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
     set(THREADS_PREFER_PTHREAD_FLAG TRUE)
     find_package(Threads REQUIRED)
 
-    target_link_libraries(Smash64r PRIVATE "-latomic -static-libstdc++" ${CMAKE_DL_LIBS} Threads::Threads)
+    target_link_libraries(MarioKart64Recompiled PRIVATE "-latomic -static-libstdc++" ${CMAKE_DL_LIBS} Threads::Threads)
 endif()
 
-target_link_libraries(Smash64r PRIVATE
-    PatchesLib
+target_link_libraries(MarioKart64Recompiled PRIVATE
     RecompiledFuncs
     SDL2
     librecomp
@@ -326,6 +275,7 @@ else()
     if (APPLE)
         # Apple's binary is universal, so it'll work on both x86_64 and arm64
         set (DXC "DYLD_LIBRARY_PATH=${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/lib/arm64" "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/arm64/dxc-macos")
+        set(SPIRVCROSS "DYLD_LIBRARY_PATH=${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/spirv-cross/lib/arm64" "${PROJECT_SOURCE_DIR}/lib/rt64//src/contrib/spirv-cross/bin/x64/spirv-cross")
     else()
         if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|AMD64")
             set (DXC "LD_LIBRARY_PATH=${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/lib/x64" "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc")
@@ -335,9 +285,18 @@ else()
     endif()
 endif()
 
-build_vertex_shader(Smash64r "shaders/InterfaceVS.hlsl" "shaders/InterfaceVS.hlsl")
-build_pixel_shader(Smash64r "shaders/InterfacePS.hlsl" "shaders/InterfacePS.hlsl")
 
-target_sources(Smash64r PRIVATE ${SOURCES})
+build_vertex_shader(MarioKart64Recompiled "shaders/InterfaceVS.hlsl" "shaders/InterfaceVS.hlsl")
+build_pixel_shader (MarioKart64Recompiled "shaders/InterfacePS.hlsl" "shaders/InterfacePS.hlsl")
 
-set_property(TARGET Smash64r PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+target_sources(MarioKart64Recompiled PRIVATE ${SOURCES})
+
+if(APPLE)
+    target_include_directories(MarioKart64Recompiled PRIVATE /opt/homebrew/Cellar/sdl2/2.32.6/include)
+    find_library(SDL2_LIBRARY SDL2 HINTS /opt/homebrew/lib REQUIRED)
+    target_link_libraries(MarioKart64Recompiled PRIVATE ${SDL2_LIBRARY})
+    include_directories(SYSTEM /opt/homebrew/include)
+endif()
+
+set_property(TARGET MarioKart64Recompiled PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+

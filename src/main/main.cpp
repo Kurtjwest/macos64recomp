@@ -25,8 +25,11 @@
 #include "zelda_config.h"
 #include "zelda_sound.h"
 #include "zelda_render.h"
+#include "zelda_support.h"
 #include "ovl_patches.hpp"
 #include "librecomp/game.hpp"
+
+#include "../../patches/graphics.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -41,7 +44,8 @@ void exit_error(const char* str, Ts ...args) {
     // TODO pop up an error
     ((void)fprintf(stderr, str, args), ...);
     assert(false);
-    std::quick_exit(EXIT_FAILURE);
+    // std::quick_exit(EXIT_FAILURE);
+    ultramodern::error_handling::quick_exit(__FILE__, __LINE__, __FUNCTION__);
 }
 
 ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
@@ -116,7 +120,13 @@ bool SetImageAsIcon(const char* filename, SDL_Window* window)
 SDL_Window* window;
 
 ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::gfx_data_t) {
-    window = SDL_CreateWindow("Super Smash Bros: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960, SDL_WINDOW_RESIZABLE);
+    Uint32 flags = SDL_WINDOW_RESIZABLE;
+    #if defined(__APPLE__)
+    flags |= SDL_WINDOW_METAL;
+    #endif
+    window = SDL_CreateWindow("Mario Kart 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960, flags);
+    
+
 #if defined(__linux__)
     SetImageAsIcon("icons/512.png", window);
     if (ultramodern::renderer::get_graphics_config().wm_option == ultramodern::renderer::WindowMode::Fullscreen) { // TODO: Remove once RT64 gets native fullscreen support on Linux
@@ -145,6 +155,9 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     }
 
     return ultramodern::renderer::WindowHandle{ wmInfo.info.x11.display, wmInfo.info.x11.window };
+#elif defined(__APPLE__)
+    SDL_MetalView view = SDL_Metal_CreateView(window);
+    return ultramodern::renderer::WindowHandle{ wmInfo.info.cocoa.window,  SDL_Metal_GetLayer(view) };
 #else
     static_assert(false && "Unimplemented");
 #endif
@@ -303,12 +316,12 @@ void reset_audio(uint32_t output_freq) {
     update_audio_converter();
 }
 
-extern RspUcodeFunc n_aspMain;
+extern RspUcodeFunc aspMain;
 
 RspUcodeFunc* get_rsp_microcode(const OSTask* task) {
     switch (task->t.type) {
     case M_AUDTASK:
-        return n_aspMain;
+        return aspMain;
 
     default:
         fprintf(stderr, "Unknown task: %" PRIu32 "\n", task->t.type);
@@ -322,9 +335,9 @@ gpr get_entrypoint_address();
 // array of supported GameEntry objects
 std::vector<recomp::GameEntry> supported_games = {
     {
-        .rom_hash = 0x38912ac86097bfec,
-        .internal_name = "SMASH BROTHERS     ",
-        .game_id = u8"smashbrothers.us",
+        .rom_hash = 0x54572403569b87c1ULL,
+        .internal_name = "MARIO KART 64     ",
+        .game_id = u8"mk64.us",
         .is_enabled = true,
         .save_type = recomp::SaveType::Sram,
         .entrypoint_address = get_entrypoint_address(),
@@ -543,6 +556,7 @@ int main(int argc, char** argv) {
     for (const auto& game : supported_games) {
         recomp::register_game(game);
     }
+
 
     zelda64::register_overlays();
     zelda64::register_patches();

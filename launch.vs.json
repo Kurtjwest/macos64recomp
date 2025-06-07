@@ -5,8 +5,8 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "Smash64r.exe",
-      "name": "Smash64r.exe",
+      "projectTarget": "Zelda64Recompiled.exe",
+      "name": "Zelda64Recompiled.exe",
       "currentDir": "${workspaceRoot}"
     }
   ]

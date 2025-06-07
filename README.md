@@ -1,23 +1,9 @@
-# Super Smash Bros: Recompiled
-Super Smash Bros: Recompiled is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** Super Smash Bros into a native port with many new features and enhancements. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide some of these enhancements.
+# Zelda 64: Recompiled
+Zelda 64: Recompiled is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** Majora's Mask (and soon Ocarina of Time) into a native port with many new features and enhancements. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide some of these enhancements.
 
 ### [Check out the latest release here](https://github.com/Mr-Wiseguy/Zelda64Recomp/releases/latest).
 
 ### **This repository and its releases do not contain game assets. The original game is required to build or run this project.**
-
-<div align="left" valign="middle">
-<a href="https://runblaze.dev">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://www.runblaze.dev/logo_dark.png">
-   <img align="right" src="https://www.runblaze.dev/logo_light.png" height="102px"/>
- </picture>
-</a>
-
-<br style="display: none;"/>
-
-_Thank you [Blaze](https://runblaze.dev) for supporting this project by providing Linux ARM64 and Apple Silicon macOS Github Action Runners!_
-
-</div>
 
 ## Table of Contents
 * [System Requirements](#system-requirements)
@@ -102,7 +88,6 @@ To play on Steam Deck, extract the Linux build onto your deck. Then, in desktop 
 * Texture Packs
 * Model Replacements
 * Ray Tracing (via RT64)
-* Multi-language support with support for loading custom translations
 
 ## FAQ
 

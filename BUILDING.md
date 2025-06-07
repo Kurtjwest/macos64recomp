@@ -1,8 +1,13 @@
 # Building Guide
 
-This guide will help you build the project on your local machine. The process will require you to provide a decompressed ROM of the US version of the game.
+> [!NOTE]  
+> The need for an elf file from the Majora's Mask decompilation is temporary and will be removed in the future.
 
-These steps cover: decompressing the ROM, running the recompiler and finally building the project.
+This guide will help you build the project on your local machine. The process will require you to provide two items:
+- A decompressed ROM of the US version of the game.
+- An elf file created from [this commit](https://github.com/zeldaret/mm/tree/23beee0717364de43ca9a82957cc910cf818de90) of the Majora's Mask decompilation.
+
+These steps cover: acquiring these, running the required processes and finally building the project.
 
 ## 1. Clone the Zelda64Recomp Repository
 This project makes use of submodules so you will need to clone the repository with the `--recurse-submodules` flag.
@@ -20,7 +25,7 @@ For Linux the instructions for Ubuntu are provided, but you can find the equival
 
 ```bash
 # For Ubuntu, simply run:
-sudo apt-get install cmake ninja-build libsdl2-dev libgtk-3-dev lld llvm clang
+sudo apt-get install cmake ninja libsdl2-dev libgtk-3-dev lld llvm clang-15
 ```
 
 ### Windows
@@ -35,14 +40,20 @@ The other tool necessary will be `make` which can be installe via [Chocolatey](h
 choco install make
 ```
 
-## 3. Decompressing the target ROM
-You will need to decompress the NTSC-U N64 Majora's Mask ROM (sha1: d6133ace5afaa0882cf214cf88daba39e266c078) before running the recompiler.
+## 3. Creating the ELF file & decompressed ROM
+You will need to build [this commit](https://github.com/zeldaret/mm/tree/23beee0717364de43ca9a82957cc910cf818de90) of the Majora's Mask decompilation. Follow their build instructions to generate the ELF file and decompressed ROM. However, while building you may get the following build error:
+```bash
+RuntimeError: 'jr' instruction does not have an 'jump label' field
+```
 
-There are a few tools that can do it:
-* This python script from the Majora's Mask decompilation project: https://github.com/zeldaret/mm/blob/main/tools/buildtools/decompress_baserom.py
-* https://github.com/z64tools/z64decompress
+To fix this you will have to modify the problematic file `tools/disasm/disasm.py` at line 1115. This issue is due to a bug in this specific commit of the decomp project and will be resolved once Zelda64Recomp is updated to a more recent commit. To fix it, replace the line:
+```diff
+- elif insn.isJump():
++ elif insn.isJumpWithAddress():
+```
 
-Regardless of which method you use, copy the decompressed ROM to the root of the Zelda64Recomp repository with this filename:
+Upon successful build it will generate the two required files. Copy them to the root of the Zelda64Recomp repository:
+- `mm.us.rev1.rom_uncompressed.elf`
 - `mm.us.rev1.rom_uncompressed.z64`
 
 ## 4. Generating the C code
@@ -60,9 +71,7 @@ After that, go back to the repository root, and run the following commands:
 
 Finally, you can build the project! :rocket:
 
-On Windows, you can open the repository folder with Visual Studio, and you'll be able to `[build / run / debug]` the project from there.
-
-If you prefer the command line or you're on a Unix platform you can build the project using CMake:
+On Windows, you can open the repository folder with Visual Studio, and you'll be able to `[build / run / debug]` the project from there. If you prefer the commandline or you're on a Unix platform you can build the project using CMake:
 
 ```bash
 cmake -S . -B build-cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -G Ninja -DCMAKE_BUILD_TYPE=Release # or Debug if you want to debug
@@ -71,7 +80,7 @@ cmake --build build-cmake --target Zelda64Recompiled -j$(nproc) --config Release
 
 ## 6. Success
 
-Voilà! You should now have a `Zelda64Recompiled` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
+Voilà! You should now have a `Zelda64Recompiled` file in the `build-cmake` directory!
 
 > [!IMPORTANT]  
 > In the game itself, you should be using a standard ROM, not the decompressed one.

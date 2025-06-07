@@ -1,10 +1,6 @@
 #ifndef __PATCHES_H__
 #define __PATCHES_H__
 
-#define RECOMP_EXPORT __attribute__((section(".recomp_export")))
-#define RECOMP_PATCH __attribute__((section(".recomp_patch")))
-#define RECOMP_FORCE_PATCH __attribute__((section(".recomp_force_patch")))
-
 // TODO fix renaming symbols in patch recompilation
 #define osCreateMesgQueue osCreateMesgQueue_recomp
 #define osRecvMesg osRecvMesg_recomp
@@ -25,8 +21,7 @@
 #define cosf __cosf_recomp
 #define bzero bzero_recomp
 #define gRandFloat sRandFloat
-// #include "global.h"
-#include "PR/ultratypes.h"
+#include "global.h"
 #include "rt64_extended_gbi.h"
 
 #ifndef gEXFillRectangle
@@ -66,6 +61,26 @@
 
 
 int recomp_printf(const char* fmt, ...);
+float recomp_powf(float, float);
+
+static inline void* actor_relocate(Actor* actor, void* addr) {
+    if ((uintptr_t)addr >= 0x80800000) {
+        return (void*)((uintptr_t)addr -
+                (intptr_t)((uintptr_t)actor->overlayEntry->vramStart - (uintptr_t)actor->overlayEntry->loadedRamAddr));
+    }
+    else {
+        recomp_printf("Not an overlay address!: 0x%08X 0x%08X 0x%08X\n", (u32)addr, (u32)actor->overlayEntry->vramStart, (u32)actor->overlayEntry->loadedRamAddr);
+        return addr;
+    }
+}
+
+typedef enum {
+    /* 0 */ PICTO_BOX_STATE_OFF,         // Not using the pictograph
+    /* 1 */ PICTO_BOX_STATE_LENS,        // Looking through the lens of the pictograph
+    /* 2 */ PICTO_BOX_STATE_SETUP_PHOTO, // Looking at the photo currently taken
+    /* 3 */ PICTO_BOX_STATE_PHOTO
+} PictoBoxState;
+
 
 #define INCBIN(identifier, filename)          \
     asm(".pushsection .rodata\n"              \
@@ -78,6 +93,18 @@ int recomp_printf(const char* fmt, ...);
         "\t.balign 8\n"                       \
         "\t.popsection\n");                   \
     extern u8 identifier[]
+
+void draw_dpad(PlayState* play);
+void draw_dpad_icons(PlayState* play);
+
+void View_ApplyInterpolate(View* view, s32 mask, bool reset_interpolation_state);
+
+void set_camera_skipped(bool skipped);
+void clear_camera_skipped();
+void edit_billboard_groups(PlayState* play);
+bool camera_was_skipped();
+void room_load_hook(PlayState* play, Room* room);
+void draw_autosave_icon(PlayState* play);
 
 void recomp_crash(const char* err);
 
