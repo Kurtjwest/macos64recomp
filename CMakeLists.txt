@@ -73,7 +73,7 @@ target_include_directories(RecompiledFuncs PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
     ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
-    ${CMAKE_SOURCE_DIR}/N64Recomp/include
+    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
 )
 
 file(GLOB FUNC_C_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/*.c)
@@ -95,7 +95,7 @@ target_include_directories(PatchesLib PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
     ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
-    ${CMAKE_SOURCE_DIR}/N64Recomp/include
+    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
 )
 
 target_sources(PatchesLib PRIVATE
@@ -137,7 +137,7 @@ add_custom_command(OUTPUT
                        ${CMAKE_SOURCE_DIR}/RecompiledPatches/recomp_overlays.inl
                        ${CMAKE_SOURCE_DIR}/RecompiledPatches/funcs.h
                    # TODO: Look into why modifying patches requires two builds to take
-                   COMMAND ${CMAKE_BINARY_DIR}/N64Recomp/N64Recomp patches.toml
+                   COMMAND ${CMAKE_SOURCE_DIR}/N64Recomp patches.toml
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                    DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf
 )
@@ -240,7 +240,7 @@ target_include_directories(Kirby64Recompiled PRIVATE
     ${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/nativefiledialog-extended/src/include
     ${CMAKE_SOURCE_DIR}/lib/slot_map/slot_map
     ${CMAKE_BINARY_DIR}/shaders
-    ${CMAKE_SOURCE_DIR}/N64Recomp/include
+    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
